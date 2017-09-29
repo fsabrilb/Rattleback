@@ -7,7 +7,7 @@ using namespace std;
 
 const double Kx=1,Ky=1,Kz=1;
 const double Lx=100,Ly=100,Lz=100;
-const int Nx=1,Ny=1,Nz=1;
+const int Nx=2,Ny=1,Nz=1;
 const int N2D=Nx*Ny,N3D=Nx*Ny*Nz;
 
 const double Xi=0.1786178958448091;
@@ -65,7 +65,7 @@ void Collider::AllForces(Body* Spring){
   int i,j;
   for(i=0;i<N2D;i++){Spring[i].EraseForce();}
   for(i=0;i<N2D;i++){Spring[i].AddForce_x(-Kx*Spring[i].Rx);}
-  for(i=0;i<N2D;i++){for(j=0;j<N2D;j++){InteractionForce(Spring[i],Spring[j]);}}
+  for(i=0;i<N2D;i++){for(j=i+1;j<N2D;j++){InteractionForce(Spring[i],Spring[j]);}}
 }
 
 void Collider::InteractionForce(Body & Spring1, Body & Spring2){
@@ -73,7 +73,7 @@ void Collider::InteractionForce(Body & Spring1, Body & Spring2){
   double dry=Spring2.Ry-Spring1.Ry;
   double drz=Spring2.Rz-Spring1.Rz;
   double F1x,F1y,F1z;
-  F1x=0;F1y=0;F1z=0;
+  F1x=Kx*drx;F1y=0;F1z=0;
   Spring1.AddForce_x(F1x);
   Spring1.AddForce_y(F1y);
   Spring1.AddForce_z(F1z);
@@ -101,17 +101,18 @@ int main(void)
   Collider Hooke;
   int i;
 
-  double m0=1, r0=10;  
-  double Rx0=Lx/2, Ry0=0,Rz0=0;
+  double m0=1,r0=10,m1=1,r1=5;
+  double Rx0=Lx/2,  Ry0=0,Rz0=0,Vx0=0,Vy0=0,Vz0=0;
+  double Rx1=5*Lx/8,Ry1=0,Rz1=0,Vx1=0,Vy1=0,Vz1=0;
   double omegax=sqrt(Kx/m0);
-  double Vx0=0,Vy0=omegax*Rx0,Vz0=0;
   double Tx=2*M_PI/omegax, tmax=5.0*Tx;
     
   Spring[0].Start( Rx0, Ry0, Rz0, Vx0, Vy0, Vz0, m0, r0);
+  Spring[1].Start( Rx1, Ry1, Rz1, Vx1, Vy1, Vz1, m1, r1);
 
   for(t=0;t<tmax;t+=dt)
     {
-      cout<<Spring[0].Getx()<<endl;
+      cout<<t<<"\t"<<Spring[0].Getx()<<"\t"<<Spring[1].Getx()<<endl;
       //Movese con Omelyan PEFRL
       for(i=0;i<N2D;i++){Spring[i].Move_x(dt,Xi);}
       for(i=0;i<N2D;i++){Spring[i].Move_y(dt,Xi);}
