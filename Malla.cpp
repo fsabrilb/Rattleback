@@ -101,18 +101,37 @@ int main(void)
   Collider Hooke;
   int i;
 
-  double m0=1,r0=10,m1=1,r1=5;
+  double m0=1,r0=10,m1=1,r1=5,m2=1,r2=15;
   double Rx0=Lx/2,  Ry0=0,Rz0=0,Vx0=0,Vy0=0,Vz0=0;
   double Rx1=5*Lx/8,Ry1=0,Rz1=0,Vx1=0,Vy1=0,Vz1=0;
+  double Rx2=3*Lx/4,Ry2=0,Rz2=0,Vx2=0,Vy2=0,Vz2=0;
   double omegax=sqrt(Kx/m0);
+  /*Omegas Teoricas-------------------------------------------------*/
+  double w1=omegax*(1-sqrt(2)/2),w2=omegax,w3=omegax*(1+sqrt(2)/2);
+  /*Soluciones Teoricas*/
+  //A1*cos(w1*t)        +B1*cos(w2*t)+C1*cos(w3*t)
+  //A1*cos(w1*t)*sqrt(2)             -C1*cos(w3*t)*sqrt(2)
+  //A1*cos(w1*t)        -B1*cos(w2*t)+C1*cos(w3*t)
+  //Condiciones de reposo iniciales dan:
+  //A1=(Rx0+Rx2+sqrt(2)*Rx1)/4,
+  //B1=(Rx0-Rx2)/2,
+  //C1=(Rx0+Rx2-sqrt(2)*Rx1)/4
+  /*Implementacion*/
+  double A1=(Rx0+Rx2+sqrt(2)*Rx1)/4.0,B1=(Rx0-Rx2)/2.0,C1=(Rx0+Rx2-sqrt(2)*Rx1)/4.0;
+  /*----------------------------------------------------------------*/
   double Tx=2*M_PI/omegax, tmax=5.0*Tx;
     
   Spring[0].Start( Rx0, Ry0, Rz0, Vx0, Vy0, Vz0, m0, r0);
   Spring[1].Start( Rx1, Ry1, Rz1, Vx1, Vy1, Vz1, m1, r1);
+  Spring[2].Start( Rx2, Ry2, Rz2, Vx2, Vy2, Vz2, m2, r2);
 
   for(t=0;t<tmax;t+=dt)
     {
-      cout<<t<<"\t"<<Spring[0].Getx()<<"\t"<<Spring[1].Getx()<<endl;
+      cout<<t<<"\t"
+	  <<Spring[0].Getx()<<"\t"<<<<"\t"
+	  <<Spring[1].Getx()<<"\t"<<<<"\t"
+	  <<Spring[2].Getx()<<"\t"<<<<"\t"
+	  <<endl;
       //Movese con Omelyan PEFRL
       for(i=0;i<N2D;i++){Spring[i].Move_x(dt,Xi);}
       for(i=0;i<N2D;i++){Spring[i].Move_y(dt,Xi);}
