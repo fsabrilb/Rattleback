@@ -7,7 +7,7 @@ using namespace std;
 
 const double Kx=1,Ky=1,Kz=1;
 const double Lx=100,Ly=100,Lz=100;
-const int Nx=2,Ny=1,Nz=1;
+const int Nx=3,Ny=1,Nz=1;
 const int N2D=Nx*Ny,N3D=Nx*Ny*Nz;
 
 const double Xi=0.1786178958448091;
@@ -62,10 +62,12 @@ public:
 };
 /*--------------------------------------COLLIDER'S FUNCTIONS------------------------------------------------------------------------*/
 void Collider::AllForces(Body* Spring){
-  int i,j;
+  int i;
   for(i=0;i<N2D;i++){Spring[i].EraseForce();}
-  for(i=0;i<N2D;i++){Spring[i].AddForce_x(-Kx*Spring[i].Rx);}
-  for(i=0;i<N2D;i++){for(j=i+1;j<N2D;j++){InteractionForce(Spring[i],Spring[j]);}}
+  Spring[0].AddForce_x(-Kx*Spring[0].Rx); Spring[N2D-1].AddForce_x(-Kx*Spring[N2D-1].Rx);
+  for(i=0;i<N2D;i++){
+    if(i!=N2D-1){InteractionForce(Spring[i],Spring[i+1]);}
+    else{Spring[N2D-1].AddForce_x(0);}}
 }
 
 void Collider::InteractionForce(Body & Spring1, Body & Spring2){
@@ -101,13 +103,14 @@ int main(void)
   Collider Hooke;
   int i;
 
-  double m0=1,r0=10,m1=1,r1=5,m2=1,r2=15;
+  double m0=1,r0=5,m1=1,r1=10,m2=1,r2=15;
   double Rx0=Lx/2,  Ry0=0,Rz0=0,Vx0=0,Vy0=0,Vz0=0;
   double Rx1=5*Lx/8,Ry1=0,Rz1=0,Vx1=0,Vy1=0,Vz1=0;
   double Rx2=3*Lx/4,Ry2=0,Rz2=0,Vx2=0,Vy2=0,Vz2=0;
   double omegax=sqrt(Kx/m0);
   /*Omegas Teoricas-------------------------------------------------*/
-  double w1=omegax*(1-sqrt(2)/2),w2=omegax,w3=omegax*(1+sqrt(2)/2);
+  double w1=sqrt(2)*omegax*sqrt(1-sqrt(2)/2),w2=sqrt(2)*omegax,w3=sqrt(2)*omegax*sqrt(1+sqrt(2)/2);
+  double w4=omegax,w5=sqrt(3)*omegax;
   /*Soluciones Teoricas*/
   //A1*cos(w1*t)        +B1*cos(w2*t)+C1*cos(w3*t)
   //A1*cos(w1*t)*sqrt(2)             -C1*cos(w3*t)*sqrt(2)
@@ -117,9 +120,9 @@ int main(void)
   //B1=(Rx0-Rx2)/2,
   //C1=(Rx0+Rx2-sqrt(2)*Rx1)/4
   /*Implementacion*/
-  double A1=(Rx0+Rx2+sqrt(2)*Rx1)/4.0,B1=(Rx0-Rx2)/2.0,C1=(Rx0+Rx2-sqrt(2)*Rx1)/4.0;
+  double A1=(Rx0+Rx2+sqrt(2)*Rx1)/4,B1=(Rx0-Rx2)/2,C1=(Rx0+Rx2-sqrt(2)*Rx1)/4;
   /*----------------------------------------------------------------*/
-  double Tx=2*M_PI/omegax, tmax=5.0*Tx;
+  double Tx=2*M_PI/omegax, tmax=10*Tx;
     
   Spring[0].Start( Rx0, Ry0, Rz0, Vx0, Vy0, Vz0, m0, r0);
   Spring[1].Start( Rx1, Ry1, Rz1, Vx1, Vy1, Vz1, m1, r1);
@@ -128,9 +131,9 @@ int main(void)
   for(t=0;t<tmax;t+=dt)
     {
       cout<<t<<"\t"
-	  <<Spring[0].Getx()<<"\t"<<<<"\t"
-	  <<Spring[1].Getx()<<"\t"<<<<"\t"
-	  <<Spring[2].Getx()<<"\t"<<<<"\t"
+	  <<Spring[0].Getx()<<"\t"<<A1*cos(w1*t)+B1*cos(w2*t)+C1*cos(w3*t)<<"\t"
+	  <<Spring[1].Getx()<<"\t"<<A1*cos(w1*t)*sqrt(2)-C1*cos(w3*t)*sqrt(2)<<"\t"
+	  <<Spring[2].Getx()<<"\t"<<A1*cos(w1*t)-B1*cos(w2*t)+C1*cos(w3*t)<<"\t"
 	  <<endl;
       //Movese con Omelyan PEFRL
       for(i=0;i<N2D;i++){Spring[i].Move_x(dt,Xi);}
