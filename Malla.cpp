@@ -36,6 +36,7 @@ public:
   void AddForce_x(double F0x);
   void AddForce_y(double F0y);
   void AddForce_z(double F0z);
+  void Draw(void);
   friend class Collider;
   friend class Oscillator;
 };
@@ -52,6 +53,7 @@ void Body::EraseForce(void){Fx=0;Fy=0;Fz=0;}
 void Body::AddForce_x(double F0x){Fx+=F0x;}
 void Body::AddForce_y(double F0y){Fy+=F0y;}
 void Body::AddForce_z(double F0z){Fz+=F0z;}
+void Body::Draw(void){cout<<", "<<Rx<<"+"<<r<<"*cos(t),"<<Ry<<"+"<<r<<"*sin(t)";}
 /*--------------------------------------CLASS COLLIDER-------------------------------------------------------------------------------*/
 class Collider{
 private:
@@ -93,12 +95,25 @@ void Collider::InteractionForce(Body & Spring1, Body & Spring2){
 /*-------------------------------------OSCILLATOR'S FUNCTIONS--------------------------------------------*/
 
 /*-------------------------------------GLOBAL'S FUNCTIONS------------------------------------------------*/
-
+void StartAnimation(void){
+  cout<<"set terminal gif animate"<<endl; 
+  cout<<"set output 'MiResorte.gif'"<<endl;
+  cout<<"unset key"<<endl;
+  cout<<"set xrange [-100:100]"<<endl;
+  cout<<"set yrange [-100:100]"<<endl;
+  cout<<"set size ratio -1"<<endl;
+  cout<<"set parametric"<<endl;
+  cout<<"set trange [0:2*pi]"<<endl;
+  cout<<"set isosamples 12"<<endl;  
+}
+void StartSquare(void){cout<<"plot 0,0 ";}
+void FinishSquare(void){cout<<endl;}
 /*-------------------------------------MAIN PROGRAM------------------------------------------------------*/
 
 int main(void)
 {
   double t,dt=1e-1;
+  double tdrawings,Ndrawings;
   Body Spring[N2D];
   Collider Hooke;
   int i;
@@ -128,13 +143,22 @@ int main(void)
   Spring[1].Start( Rx1, Ry1, Rz1, Vx1, Vy1, Vz1, m1, r1);
   Spring[2].Start( Rx2, Ry2, Rz2, Vx2, Vy2, Vz2, m2, r2);
 
-  for(t=0;t<tmax;t+=dt)
+  StartAnimation();  Ndrawings=1000;
+  
+  for(t=tdrawings=0;t<tmax;t+=dt,tdrawings+=dt)
     {
+      if(tdrawings>tmax/Ndrawings){
+      StartSquare();
+      for(i=0;i<N2D;i++){Spring[i].Draw();}
+      FinishSquare();
+      tdrawings=0;}
+      /*
       cout<<t<<"\t"
 	  <<Spring[0].Getx()<<"\t"<<A1*cos(w1*t)+B1*cos(w2*t)+C1*cos(w3*t)<<"\t"
 	  <<Spring[1].Getx()<<"\t"<<A1*cos(w1*t)*sqrt(2)-C1*cos(w3*t)*sqrt(2)<<"\t"
 	  <<Spring[2].Getx()<<"\t"<<A1*cos(w1*t)-B1*cos(w2*t)+C1*cos(w3*t)<<"\t"
 	  <<endl;
+      */
       //Movese con Omelyan PEFRL
       for(i=0;i<N2D;i++){Spring[i].Move_x(dt,Xi);}
       for(i=0;i<N2D;i++){Spring[i].Move_y(dt,Xi);}
