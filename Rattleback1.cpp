@@ -172,9 +172,9 @@ void StartAnimation3D(void){
   cout<<"set xlabel 'x'"<<endl;
   cout<<"set ylabel 'y'"<<endl;
   cout<<"set zlabel 'z'"<<endl;
-  cout<<"set xrange [-80:240]"<<endl;
-  cout<<"set yrange [-70:210]"<<endl;
-  cout<<"set zrange [-300:150]"<<endl; 
+  cout<<"set xrange [-150:350]"<<endl;
+  cout<<"set yrange [-200:500]"<<endl;
+  cout<<"set zrange [-400:160]"<<endl; 
   //cout<<"set autoscale"<<endl;
   cout<<"set size ratio -1"<<endl;
   cout<<"set parametric"<<endl;
@@ -186,26 +186,51 @@ void StartAnimation3D(void){
 void StartSquare3D(void){cout<<"splot 0,0,0 ";}
 void StartFixedMasses3D(double x0Break,double y0Break,double z0Break,double r0){
   int i,j;
-  for(i=0;i<Nx;i++){for(j=0;j<Nz;j++){
-      cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*j<<"+"<<r0<<"*cos(v)";}}/*Down Plane*/
-  for(i=0;i<Nx;i++){for(j=0;j<Nz;j++){
-      cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*Ny<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*j<<"+"<<r0<<"*cos(v)";}}/*UpPlane*/
-  for(i=0;i<Ny;i++){for(j=0;j<Nz;j++){
-      cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*i<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break*j<<"+"<<r0<<"*cos(v)";}}/*Left Plane*/
-  for(i=0;i<Ny;i++){for(j=0;j<Nz;j++){
-      cout<<", "<<x0Break*Nx<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*i<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break*j<<"+"<<r0<<"*cos(v)";}}/*RigPlane*/
-  for(i=0;i<Nx;i++){for(j=0;j<Ny;j++){
-      cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*j<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";}}/*Front Plane*/
-  for(i=0;i<Nx;i++){for(j=0;j<Ny;j++){
-      cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*j<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*Nz<<"+"<<r0<<"*cos(v)";}}/*BackPlane*/
+  //for(i=0;i<Nx;i++){for(j=0;j<Nz;j++){
+  //    cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*j<<"+"<<r0<<"*cos(v)";}}/*Front Plane*/
+  //for(i=0;i<Nx;i++){for(j=0;j<Nz;j++){
+  //    cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*Ny<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*j<<"+"<<r0<<"*cos(v)";}}/*BackPlane*/
+  //for(i=0;i<Ny;i++){for(j=0;j<Nz;j++){
+  //    cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*i<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*j<<"+"<<r0<<"*cos(v)";}}/*Left Plane*/
+  //for(i=0;i<Ny;i++){for(j=0;j<Nz;j++){
+  //    cout<<", "<<x0Break*Nx<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*i<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*j<<"+"<<r0<<"*cos(v)";}}/*RigPlane*/
+  //for(i=0;i<Nx;i++){for(j=0;j<Ny;j++){
+  //    cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*j<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";}}/*Down Plane*/
+  //for(i=0;i<Nx;i++){for(j=0;j<Ny;j++){
+  //    cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*j<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*Nz<<"+"<<r0<<"*cos(v)";}}/*TopPlane*/
+  /*Lines Corners*/
+  //for(i=0;i<Nx;i++){
+  //  cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";}/*Down Front*/
+  //for(i=0;i<Nx;i++){
+  //  cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*Ny<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";}/*Down Back*/
+  //for(i=0;i<Ny;i++){
+  //  cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*i<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";}/*Down Left*/
+  //for(i=0;i<Ny;i++){
+  //  cout<<", "<<x0Break*Nx<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*i<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";}/*Down Right*/
+  for(i=0;i<Nx;i++){
+    cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*Nz<<"+"<<r0<<"*cos(v)";}/*Top Front*/
+  for(i=0;i<Nx;i++){
+    cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*Ny<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*Nz<<"+"<<r0<<"*cos(v)";}/*Top Back*/
+  for(i=0;i<Ny;i++){
+    cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*i<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*Nz<<"+"<<r0<<"*cos(v)";}/*Top Left*/
+  for(i=0;i<Ny;i++){
+    cout<<", "<<x0Break*Nx<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*i<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*Nz<<"+"<<r0<<"*cos(v)";}/*Top Right*/
+  //for(i=0;i<Nz;i++){
+  //  cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*i<<"+"<<r0<<"*cos(v)";}/*Front Left*/
+  //for(i=0;i<Nz;i++){
+  //  cout<<", "<<x0Break*Nx<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*i<<"+"<<r0<<"*cos(v)";}/*Front Right*/
+  //for(i=0;i<Nz;i++){
+  //  cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*Ny<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*i<<"+"<<r0<<"*cos(v)";}/*Back Left*/
+  //for(i=0;i<Nz;i++){
+  //  cout<<", "<<x0Break*Nx<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*Ny<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*i<<"+"<<r0<<"*cos(v)";}/*Back Right*/
   /*Corners*/
-  cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";/*Lower Left Front*/
-  cout<<", "<<Nx*x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";/*Lower Left Back*/
-  cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<Ny*y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";/*Lower Right Front*/
-  cout<<", "<<Nx*x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<Ny*y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";/*Lower RightBack*/
+  //cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";/*Lower Left Front*/
+  //cout<<", "<<Nx*x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";/*Lower Right Front*/
+  //cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<Ny*y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";/*Lower Left Back*/
+  //cout<<", "<<Nx*x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<Ny*y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";/*Lower RightBack*/
   cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<Nz*z0Break<<"+"<<r0<<"*cos(v)";/*Top Left Front*/
-  cout<<", "<<Nx*x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<Nz*z0Break<<"+"<<r0<<"*cos(v)";/*Top Left Back*/
-  cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<Ny*y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<Nz*z0Break<<"+"<<r0<<"*cos(v)";/*Top Right Front*/
+  cout<<", "<<Nx*x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<Nz*z0Break<<"+"<<r0<<"*cos(v)";/*Top Right Front*/
+  cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<Ny*y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<Nz*z0Break<<"+"<<r0<<"*cos(v)";/*Top Left Back*/
   cout<<", "<<Nx*x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<Ny*y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<Nz*z0Break<<"+"<<r0<<"*cos(v)";/*Top RightBack*/
 }
 
@@ -221,8 +246,8 @@ int main(void)
   Oscillator SpringK[M];     /*Oscillators Springs*/
   Collider Hooke;            /*Collider*/
   
-  double m0=1,r0=5,Rx0=Lx/8,Ry0=Lx/10,Rz0=Lx/5,Vx0=0,Vy0=0,Vz0=0;/*Initial Conditions*/
-  double x0Break=80, y0Break=70, z0Break=50;                      /*Distance of Separation in each axis*/
+  double m0=1,r0=5,Rx0=Lx/8,Ry0=Lx/10,Rz0=Lx/5,Vx0=0,Vy0=0,Vz0=0; /*Initial Conditions*/
+  double x0Break=Lx, y0Break=3*Ly/2, z0Break=Lz/2;                /*Distance of Separation in each axis*/
   double omegax=sqrt(Kx/m0),omegay=sqrt(Ky/m0),omegaz=sqrt(Kz/m0);/*One of Frequencies in each axis*/
   double Tx=2*M_PI/omegax, tmax=1*Tx;                             /*Time Step and Tmax*/
 
@@ -237,7 +262,7 @@ int main(void)
       
       if(tdrawings>tmax/Ndrawings){
 	StartSquare3D();
-	//StartFixedMasses3D(x0Break,y0Break,z0Break,r0);
+	StartFixedMasses3D(x0Break,y0Break,z0Break,r0);
 	for(i=0;i<N3D;i++){Spring[i].Draw3D();}
 	FinishSquare();
 	tdrawings=0;}
