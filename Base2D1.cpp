@@ -114,14 +114,9 @@ void Collider::InteractionForce(Body & Spring1, Body & Spring2){
   double drx=Spring2.Rx-Spring1.Rx;
   double dry=Spring2.Ry-Spring1.Ry;
   double drz=Spring2.Rz-Spring1.Rz;
-  double F1x,F1y,F1z;
-  F1x=Kx*drx;F1y=Ky*dry;F1z=Kz*drz;
-  Spring1.AddForce_x(F1x);
-  Spring1.AddForce_y(F1y);
-  Spring1.AddForce_z(F1z);
-  Spring2.AddForce_x(-F1x);
-  Spring2.AddForce_y(-F1y);
-  Spring2.AddForce_z(-F1z);
+  double F1x,F1y,F1z; vector3D F1;
+  F1x=Kx*drx;F1y=Ky*dry;F1z=Kz*drz; F1.cargue(F1x,F1y,F1z);
+  Spring1.AddForce(F1); Spring2.AddForce(F1*(-1));
 }
 /*-------------------------------------CLASS OSCILLATOR--------------------------------------------------*/
 class Oscillator{
