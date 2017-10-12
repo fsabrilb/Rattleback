@@ -6,8 +6,8 @@
 
 using namespace std;
 
-const double g=0.5, K=1;
-const double Kx=2,Ky=2,Kz=1;               /*Spring's Constant in each axis*/
+const double g=1, K=1;
+const double Kx=1,Ky=1,Kz=1;               /*Spring's Constant in each axis*/
 const double Lx=100,Ly=100,Lz=100;         /*Lenght for parametrize the sides of the box*/
 const double Gamma=20, Kcundall=10, MU=0.4;/*Contact Force*/
 const double Beta=5,Gamma_t=0.5;           /*Viscous Force over Spring*/
@@ -104,6 +104,10 @@ void Collider::AllForces(Body* Spring,double dt){
       else{InteractionForce(Spring[j*Nx+(i%Nx)],Spring[j*Nx+((i+1)%Nx)]);InteractionForce(Spring[i],Spring[i+Nx]);}}}
   /*Sphere and Spring*/
   for(i=0;i<N2D;i++){InteractionForce2(Spring[i],Spring[N2D],l[i][N2D],InCollision[i][N2D],dt);}
+  if(0<norma(Spring[N2D].Tau)/(Spring[N2D].NormF()*Spring[N2D].r) and norma(Spring[N2D].Tau)/(Spring[N2D].NormF()*Spring[N2D].r)<=1){
+    cout<<Spring[N2D].NormF()*Spring[N2D].r<<"\t"
+	<<Spring[N2D].Tau.z()<<"\t"<<norma(Spring[N2D].Tau)/(Spring[N2D].NormF()*Spring[N2D].r)<<"\t"
+	<<asin(norma(Spring[N2D].Tau)/(Spring[N2D].NormF()*Spring[N2D].r))<<endl;}
 }
 
 void Collider::InteractionForce(Body & Spring1, Body & Spring2){
@@ -148,7 +152,7 @@ void Collider::InteractionForce2(Body & Spring1, Body & Spring2,vector3D & l,boo
     Ftmax=MU*componentFn; normFt=norma(Ft);
     if(normFt>Ftmax){Ft=l*(-Ftmax/norma(l));}
     /*Viscous Force*/
-    Ft-=m12*Gamma_t*Vct;
+    Ft-=m2*Gamma_t*Vct;
     
     /*Building Total Force*/
     F2=Fn+Ft;
@@ -212,7 +216,7 @@ void FinishSquare(void){cout<<endl;}
 int main(void)
 {
   int i,j,M=Ny*(Nx-1)+Nx*(Ny-1);
-  double t,dt=1e-1;          /*Times*/
+  double t,dt=1e-2;          /*Times*/
   double tdrawings,Ndrawings;/*Accountants*/
   Body Spring[N2D+1];        /*Oscillators Masses*/
   Oscillator SpringK[M];     /*Oscillators Springs*/
@@ -220,7 +224,7 @@ int main(void)
 
   double x0Break=Lx/2, y0Break=Ly/2, z0Break=0;                                      /*Distance of Separation in each axis*/
   double m0=1 ,r0=18,Rx0=0   ,Ry0=0  ,Rz0=0,Vx0=0,Vy0=0 ,Vz0=0,Theta0=0,W0=0; /*Initial Conditions*/
-  double m1=30,r1=80,Rx1=Nx*x0Break/2,Ry1=(Ny+2)*y0Break,Rz1=0,Vx1=0,Vy1=0 ,Vz1=0,Theta1=0,W1=4; /*Initial Conditions*/
+  double m1=30,r1=80,Rx1=Nx*x0Break/2,Ry1=(Ny+1)*y0Break,Rz1=0,Vx1=10,Vy1=0 ,Vz1=0,Theta1=0,W1=4; /*Initial Conditions*/
   double omegax=sqrt(Kx/m0),omegay=sqrt(Ky/m0),omegaz=sqrt(Kz/m0);                   /*One of Frequencies in each axis*/
   double Tx=2*M_PI/omegax, tmax=5*Tx;                                                /*Time Step and Tmax*/
 
@@ -231,11 +235,11 @@ int main(void)
   /*Start Collider*/
   Hooke.Start();
   /*Start Animation*/
-  StartAnimation(x0Break);  Ndrawings=1000;
+  //StartAnimation(x0Break);  Ndrawings=1000;
   /*Integration*/
   for(t=tdrawings=0;t<tmax;t+=dt,tdrawings+=dt)
     {
-      
+      /*
       if(tdrawings>tmax/Ndrawings){
 	StartSquare();
 	//StartFixedMasses(x0Break,y0Break,r0);
@@ -243,7 +247,7 @@ int main(void)
 	//for(j=0;j<Ny;j++){for(i=0;i<Nx;i++){SpringK[i].DrawInteractionSpring(Spring[i+j*Nx],Spring[i+1+j*Nx]);}}
 	FinishSquare();
 	tdrawings=0;}
-      
+      */
       //for(i=0;i<N2D+1;i++){cout<<"\t"<<i<<"\t"<<Spring[i].Y()<<"\t"<<Spring[i].NormF()<<endl;}
       
       //Move with Omelyan PEFRL
