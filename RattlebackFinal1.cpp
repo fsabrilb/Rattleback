@@ -34,13 +34,13 @@ class Body{
 private:
   vector3D R,V,F,RBreak;/*Translation Variables*/
   vector3D Theta,W,Tau; /*Rotational Variables*/
-  double m,r,I1,I2,I3;  /*Intrinsic Variables*/
+  double m,r,I,I1,I2,I3;/*Intrinsic Variables*/
   double q0,q1,q2,q3;   /*Quaternions*/
   double Nx,Ny,Nz;      /*Torsions in Inertial System*/
 public:
   void Start(double Rx0,double Ry0,double Rz0,double Vx0,double Vy0,double Vz0,
 	     double m0,double r0,double x0Break,double y0Break,double z0Break,
-	     double Theta0,double Psi0,double Phi0,double Wx0,double Wy0,double Wz0,
+	     double Theta0,double Phi0,double Psi0,double Wx0,double Wy0,double Wz0,
 	     double Ix, double Iy, double Iz);
   /*Move Translation Variables*/
   void Move_R(double dt, double Constante);
@@ -70,6 +70,8 @@ public:
   double WY(void){return W.y();};
   double WZ(void){return W.z();};
   double GetTheta(void){return acos((q0*q0-q1*q1-q2*q2+q3*q3)/(q0*q0+q1*q1+q2*q2+q3*q3));};
+  double GetPhi(void){return atan((q1*q3+q0*q2)/(q0*q1-q2*q3));};
+  double GetPsi(void){return atan((q1*q3-q0*q2)/(q0*q1+q2*q3));};
   /*Rigid Body*/
   void CalculateXYZ(vector3D & R);
   void Rotate(double dt);
@@ -80,10 +82,10 @@ public:
 /*-------------------------------------------------BODY'S FUNCTIONS-------------------------------------------------------------------*/
 void Body::Start(double Rx0,double Ry0,double Rz0,double Vx0,double Vy0,double Vz0,
 		 double m0,double r0,double x0Break,double y0Break,double z0Break,
-		 double Theta0,double Psi0,double Phi0,double Wx0,double Wy0,double Wz0,
+		 double Theta0,double Phi0,double Psi0,double Wx0,double Wy0,double Wz0,
 		 double Ix, double Iy, double Iz){
   R.cargue(Rx0,Ry0,Rz0);V.cargue(Vx0,Vy0,Vz0);m=m0;r=r0;RBreak.cargue(x0Break,y0Break,z0Break);
-  Theta.cargue(Theta0,Psi0,Phi0);W.cargue(Wx0,Wy0,Wz0);I=2.0/5*m*r*r;Ix=I;Iy=I;Iz=I;
+  Theta.cargue(Theta0,Phi0,Psi0);W.cargue(Wx0,Wy0,Wz0);I=2.0/5*m*r*r;I1=Ix;I2=Iy;I3=Iz;
   /*Initial Position (in Quaternions)*/
   q0=cos(0.5*Theta0)*cos(0.5*(Phi0+Psi0));
   q1=sin(0.5*Theta0)*cos(0.5*(Phi0-Psi0));
@@ -121,6 +123,7 @@ void Body::Rotate(double dt){
   double q0old=q0,q1old=q1,q2old=q2,q3old=q3;
   double Wx=W.x(),Wy=W.y(),Wz=W.z();
   double Wxold=Wx,Wyold=Wy,Wzold=Wz;
+  double Thetax,Thetay,Thetaz;
   /*Update quaternions from angular velocity*/
   q0+=dt*0.5*(-q1old*Wx-q2old*Wy-q3old*Wz);
   q1+=dt*0.5*( q0old*Wx-q3old*Wy+q2old*Wz);
@@ -130,12 +133,20 @@ void Body::Rotate(double dt){
   Wx+=dt*((Nx/I1)+Wyold*Wzold*(I2-I3)/I1);
   Wy+=dt*((Ny/I2)+Wxold*Wzold*(I3-I1)/I2);
   Wz+=dt*((Nz/I3)+Wxold*Wyold*(I1-I2)/I3);
+  /*Update Angles from Quaternions*/
+  Thetax=Theta.x();Thetay=Theta.y();Thetaz=Theta.z();               /*(Theta,Phi,Psi)*/
+  Thetax+=acos((q0*q0-q1*q1-q2*q2+q3*q3)/(q0*q0+q1*q1+q2*q2+q3*q3));/*Theta*/
+  Thetay+=atan((q1*q3+q0*q2)/(q0*q1-q2*q3));                        /*Phi*/
+  Thetaz+=atan((q1*q3-q0*q2)/(q0*q1+q2*q3));                        /*Psi*/
+  Theta.cargue(Thetax,Thetay,Thetaz);
 }
 void Body::CalculateTorsion(void){
-  /*Torsion in the system attached to the body. In this case for the Rattleback (Matrix A^-1)*/
-  Ny=-2*(q1*q3-q0*q2)*m*g*r;
-  Nx=2*(q2*q3+q0*q1)*m*g*r;
-  Nz=0;
+  /*Torsion in the system attached to the body. In this case for the Sphere (Matrix A)*/
+  double Fx,Fy,Fz;
+  Fx=F.x();Fy=F.y()-m*g;Fz=F.z();
+  Ny=(q0*q0+q1*q1-q2*q2-q3*q3)*Fx*r +2*(q1*q2+q0*q3)*Fy*r           -2*(q1*q3-q0*q2)*Fz*r;
+  Nx=2*(q1*q2-q0*q3)*Fx*r           +(q0*q0-q1*q1+q2*q2-q3*q3)*Fy*r +2*(q2*q3+q0*q1)*Fz*r;
+  Nz=2*(q1*q3+q0*q2)*Fx*r           +2*(q2*q3-q0*q1)*Fy*r           +(q0*q0-q1*q1-q2*q2+q3*q3)*Fz*r;
 }
 /*------------------------------------------------CLASS COLLIDER--------------------------------------------------------------*/
 class Collider{
@@ -295,8 +306,9 @@ void Integrator(Body *Spring,Collider Hooke,double dt){
 void IntegratorRigidBody(Body & Sphere,double dt){
   Sphere.CalculateTorsion();
   Sphere.Rotate(dt);
-  vector3D RS; RS.cargue(Sphere.X(),Sphere.Y(),Sphere.Z());
-  Sphere.CalculateXYZ(RS);}
+  vector3D R; R.cargue(Sphere.X(),Sphere.Y(),Sphere.Z());
+  Sphere.CalculateXYZ(R);
+}
 /*------------------------------------------------MAIN PROGRAM----------------------------------------------------------------*/
 int main(void)
 {
@@ -311,8 +323,8 @@ int main(void)
   double x0Break=Lx, y0Break=Ly, z0Break=0;                                            /*Distance of Separation in each axis*/
   double m0=2*m,r0=35*L,Rx0=0,Ry0=0,Rz0=0,Vx0=0,Vy0=0,Vz0=0;                           /*Initial Conditions*/
   double Theta0=0,Phi0=0,Psi0=0,Wx0=0,Wy0=0,Wz0=0;                                     /*Initial Conditions*/
-  double m1=1*m,r1=200*L,Rx1=Nx*x0Break/2,Ry1=Ny*y0Break+h,Rz1=0,Vx1=30*v,Vy1=0 ,Vz1=0;/*Initial Conditions Sphere*/
-  double Theta1=0,Phi1=0,Psi1=0,Wx1=0,Wy1=0,Wz1=0.4/dt;                                /*Initial Conditions Sphere*/
+  double m1=1*m,r1=200*L,Rx1=Nx*x0Break/2,Ry1=Ny*y0Break+h,Rz1=0,Vx1=20*v,Vy1=0 ,Vz1=0;/*Initial Conditions Sphere*/
+  double Theta1=0,Phi1=0,Psi1=0,Wx1=1,Wy1=0,Wz1=0.0/dt,I1=(2.0/5)*m1*r1*r1,I2=I1,I3=I1;/*Initial Conditions Sphere*/
   double omegax=sqrt(Kx/m0),omegay=sqrt(Ky/m0),omegaz=sqrt(Kz/m0);                     /*One of Frequencies in each axis*/
   double Tx=2*M_PI/omegax, tmax=15*Tx;                                                 /*Time Step and Tmax*/
 
@@ -320,7 +332,7 @@ int main(void)
   for(i=0;i<Nx;i++){for(j=0;j<Ny;j++){
       Spring[i+Nx*j].Start(Rx0,Ry0,Rz0,Vx0,Vy0,Vz0,m0,r0,i*x0Break,j*y0Break,z0Break,Theta0,Psi0,Phi0,Wx0,Wy0,Wz0,0,0,0);}}
   /*Start Sphere*/
-  Spring[N2D].Start(Rx1,Ry1,Rz1,Vx1,Vy1,Vz1,m1,r1,0,0,0,Theta1,Phi1,Psi1,Wx1,Wy1,Wz1,0,0,0);
+  Spring[N2D].Start(Rx1,Ry1,Rz1,Vx1,Vy1,Vz1,m1,r1,0,0,0,Theta1,Psi1,Phi1,Wx1,Wy1,Wz1,I1,I2,I3);
   /*Start Collider*/
   Hooke.Start();
   /*Start Animation*/
@@ -328,7 +340,7 @@ int main(void)
   /*Integration*/
   for(t=tdrawings=0;t<tmax;t+=dt,tdrawings+=dt)
     {
-      
+      /*
       if(tdrawings>tmax/Ndrawings){
 	StartSquare();
 	//StartFixedMasses(x0Break,y0Break,r0);
@@ -336,8 +348,10 @@ int main(void)
 	//for(j=0;j<Ny;j++){for(i=0;i<Nx;i++){SpringK[i].DrawInteractionSpring(Spring[i+j*Nx],Spring[i+1+j*Nx]);}}
 	FinishSquare();
 	tdrawings=0;}
-      
+      */
       Integrator(Spring,Hooke,dt);
+      IntegratorRigidBody(Spring[N2D],dt);
+      cout<<Spring[N2D].Z()<<endl;
     }
   return 0;
 }
