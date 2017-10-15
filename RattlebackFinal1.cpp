@@ -111,7 +111,7 @@ void Body::Draw3D(void){
 void Body::CalculateXYZ(vector3D & R){
   vector3D e1,e2,e3; e1.cargue(1,0,0); e2.cargue(0,1,0); e3.cargue(0,0,1);
   double xi=R*e1,yi=R*e2,zi=R*e3,x,y,z;
-  /*Transform Non inertial system to inertial system*/
+  /*Transform Non inertial system to inertial system (Rotate the axis of Body)*/
   x=(q0*q0+q1*q1-q2*q2-q3*q3)*xi+2*(q1*q2-q0*q3)*yi+2*(q1*q3-q0*q2)*zi;
   y=2*(q1*q2+q0*q3)*xi+(q0*q0-q1*q1+q2*q2-q3*q3)*yi+2*(q2*q3-q0*q1)*zi;
   z=2*(q1*q3+q0*q2)*xi+2*(q2*q3+q0*q1)*yi+(q0*q0-q1*q1-q2*q2+q3*q3)*zi;
@@ -132,7 +132,7 @@ void Body::Rotate(double dt){
   Wz+=dt*((Nz/I3)+Wxold*Wyold*(I1-I2)/I3);
 }
 void Body::CalculateTorsion(void){
-  /*Torsion in the system attached to the body. In this case for the Rattleback (Matrix A)*/
+  /*Torsion in the system attached to the body. In this case for the Rattleback (Matrix A^-1)*/
   Ny=-2*(q1*q3-q0*q2)*m*g*r;
   Nx=2*(q2*q3+q0*q1)*m*g*r;
   Nz=0;
@@ -292,6 +292,11 @@ void Integrator(Body *Spring,Collider Hooke,double dt){
   for(i=0;i<N2D+1;i++){Spring[i].Move_R(dt,Xi);}
   for(i=0;i<N2D+1;i++){Spring[i].Move_Theta(dt,Xi);}
 }
+void IntegratorRigidBody(Body & Sphere,double dt){
+  Sphere.CalculateTorsion();
+  Sphere.Rotate(dt);
+  vector3D RS; RS.cargue(Sphere.X(),Sphere.Y(),Sphere.Z());
+  Sphere.CalculateXYZ(RS);}
 /*------------------------------------------------MAIN PROGRAM----------------------------------------------------------------*/
 int main(void)
 {
