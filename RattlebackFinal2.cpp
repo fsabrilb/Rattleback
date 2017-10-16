@@ -108,8 +108,9 @@ void Body::Draw(void){
   cout<<", "<<X()<<"+"<<r*cos(Theta.z())/(2*M_PI)<<"*t,"<<Y()<<"+"<<r*sin(Theta.z())/(2*M_PI)<<"*t";}
 void Body::Draw3D(void){
   cout<<", "<<X()<<"+"<<r<<"*sin(v)*cos(u),"<<Y()<<"+"<<r<<"*sin(v)*sin(u),"<<Z()<<"+"<<r<<"*cos(v)";
-  //cout<<", "<<X()<<"+"<<r*sin(Theta.y())*cos(Theta.z())/(2*M_PI*M_PI)<<"*u*v,"
-  //    <<Y()<<"+"<<r*sin(Theta.y())*cos(Theta.z())/(2*M_PI*M_PI)<<"*u*v";
+  cout<<", "<<X()<<"+"<<r*sin(Theta.z())*cos(Theta.x())/(2*M_PI*M_PI)<<"*u*v,"
+      <<Y()<<"+"<<r*sin(Theta.x())*sin(Theta.z())/(2*M_PI*M_PI)<<"*u*v,"
+      <<Z()<<"+"<<r*cos(Theta.z())/(M_PI)<<"*v";
 }
 void Body::CalculateXYZ(vector3D & R){
   vector3D e1,e2,e3; e1.cargue(1,0,0); e2.cargue(0,1,0); e3.cargue(0,0,1);
@@ -262,8 +263,11 @@ void Oscillator::DrawInteractionSpring3D(Body & Spring1,Body & Spring2){
 /*-------------------------------------GLOBAL'S FUNCTIONS------------------------------------------------*/
 void StartAnimation3D(double x0Break, double y0Break, double z0Break, double h){
   cout<<"set terminal gif animate"<<endl; 
-  cout<<"set output 'MySpring3DR.gif'"<<endl;
+  cout<<"set output 'MySpring3DR3.gif'"<<endl;
   cout<<"unset key"<<endl;
+  cout<<"set xlabel 'x'"<<endl;
+  cout<<"set ylabel 'y'"<<endl;
+  cout<<"set zlabel 'z'"<<endl;
   cout<<"set xrange ["<<-x0Break<<":"<<x0Break*Nx<<"]"<<endl;
   cout<<"set yrange ["<<-y0Break<<":"<<y0Break*Ny<<"]"<<endl;
   cout<<"set zrange ["<<-z0Break<<":"<<z0Break*Nz+h<<"]"<<endl;
@@ -272,20 +276,57 @@ void StartAnimation3D(double x0Break, double y0Break, double z0Break, double h){
   cout<<"set parametric"<<endl;
   cout<<"set urange [0:2*pi]"<<endl;
   cout<<"set vrange [0:pi]"<<endl;
-  cout<<"set isosamples 12"<<endl;  
+  cout<<"set isosamples 12, 12"<<endl;  
 }
 void StartSquare3D(void){cout<<"splot 0,0,0 ";}
-void StartFixedMasses(double x0Break,double y0Break,double r0){
-  int i;
-  for(i=0;i<Nx;i++){cout<<", "<<x0Break*i <<"+"<<r0<<"*cos(t),"<<-y0Break  <<"+"<<r0<<"*sin(t)";} /*Down line*/
-  for(i=0;i<Nx;i++){cout<<", "<<x0Break*i <<"+"<<r0<<"*cos(t),"<<Ny*y0Break<<"+"<<r0<<"*sin(t)";} /*Top line*/
-  for(i=0;i<Ny;i++){cout<<", "<<-x0Break  <<"+"<<r0<<"*cos(t),"<<y0Break*i <<"+"<<r0<<"*sin(t)";} /*Left line*/
-  for(i=0;i<Ny;i++){cout<<", "<<Nx*x0Break<<"+"<<r0<<"*cos(t),"<<y0Break*i <<"+"<<r0<<"*sin(t)";} /*Right line*/
+void StartFixedMasses3D(double x0Break,double y0Break,double z0Break,double r0){
+  int i,j;
+  for(i=0;i<Nx;i++){for(j=0;j<Nz;j++){
+      cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*j<<"+"<<r0<<"*cos(v)";}}/*Front Plane*/
+  for(i=0;i<Nx;i++){for(j=0;j<Nz;j++){
+      cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*Ny<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*j<<"+"<<r0<<"*cos(v)";}}/*BackPlane*/
+  for(i=0;i<Ny;i++){for(j=0;j<Nz;j++){
+      cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*i<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*j<<"+"<<r0<<"*cos(v)";}}/*Left Plane*/
+  for(i=0;i<Ny;i++){for(j=0;j<Nz;j++){
+      cout<<", "<<x0Break*Nx<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*i<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*j<<"+"<<r0<<"*cos(v)";}}/*RigPlane*/
+  for(i=0;i<Nx;i++){for(j=0;j<Ny;j++){
+      cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*j<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";}}/*Down Plane*/
+  for(i=0;i<Nx;i++){for(j=0;j<Ny;j++){
+      cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*j<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*Nz<<"+"<<r0<<"*cos(v)";}}/*TopPlane*/
+  /*Lines Corners*/
+  for(i=0;i<Nx;i++){
+    cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";}/*Down Front*/
+  for(i=0;i<Nx;i++){
+    cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*Ny<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";}/*Down Back*/
+  for(i=0;i<Ny;i++){
+    cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*i<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";}/*Down Left*/
+  for(i=0;i<Ny;i++){
+    cout<<", "<<x0Break*Nx<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*i<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";}/*Down Right*/
+  for(i=0;i<Nx;i++){
+    cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*Nz<<"+"<<r0<<"*cos(v)";}/*Top Front*/
+  for(i=0;i<Nx;i++){
+    cout<<", "<<x0Break*i<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*Ny<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*Nz<<"+"<<r0<<"*cos(v)";}/*Top Back*/
+  for(i=0;i<Ny;i++){
+    cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*i<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*Nz<<"+"<<r0<<"*cos(v)";}/*Top Left*/
+  for(i=0;i<Ny;i++){
+    cout<<", "<<x0Break*Nx<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*i<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*Nz<<"+"<<r0<<"*cos(v)";}/*Top Right*/
+  for(i=0;i<Nz;i++){
+    cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*i<<"+"<<r0<<"*cos(v)";}/*Front Left*/
+  for(i=0;i<Nz;i++){
+    cout<<", "<<x0Break*Nx<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*i<<"+"<<r0<<"*cos(v)";}/*Front Right*/
+  for(i=0;i<Nz;i++){
+    cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*Ny<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*i<<"+"<<r0<<"*cos(v)";}/*Back Left*/
+  for(i=0;i<Nz;i++){
+    cout<<", "<<x0Break*Nx<<"+"<<r0<<"*cos(u)*sin(v),"<<y0Break*Ny<<"+"<<r0<<"*sin(u)*sin(v),"<<z0Break*i<<"+"<<r0<<"*cos(v)";}/*Back Right*/
   /*Corners*/
-  cout<<", "<<-x0Break  <<"+"<<r0<<"*cos(t),"<<-y0Break  <<"+"<<r0<<"*sin(t)";/*Lower Left*/
-  cout<<", "<<Nx*x0Break<<"+"<<r0<<"*cos(t),"<<-y0Break  <<"+"<<r0<<"*sin(t)";/*Lower Right*/
-  cout<<", "<<-x0Break  <<"+"<<r0<<"*cos(t),"<<Ny*y0Break<<"+"<<r0<<"*sin(t)";/*Upper Left*/
-  cout<<", "<<Nx*x0Break<<"+"<<r0<<"*cos(t),"<<Ny*y0Break<<"+"<<r0<<"*sin(t)";/*Upper Right*/
+  cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";/*Lower Left Front*/
+  cout<<", "<<Nx*x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";/*Lower Right Front*/
+  cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<Ny*y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";/*Lower Left Back*/
+  cout<<", "<<Nx*x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<Ny*y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<-z0Break<<"+"<<r0<<"*cos(v)";/*Lower RightBack*/
+  cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<Nz*z0Break<<"+"<<r0<<"*cos(v)";/*Top Left Front*/
+  cout<<", "<<Nx*x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<-y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<Nz*z0Break<<"+"<<r0<<"*cos(v)";/*Top Right Front*/
+  cout<<", "<<-x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<Ny*y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<Nz*z0Break<<"+"<<r0<<"*cos(v)";/*Top Left Back*/
+  cout<<", "<<Nx*x0Break<<"+"<<r0<<"*cos(u)*sin(v),"<<Ny*y0Break<<"+"<<r0<<"*sin(u)*sin(v),"<<Nz*z0Break<<"+"<<r0<<"*cos(v)";/*Top RightBack*/
 }
 void FinishSquare(void){cout<<endl;}
 /*------------------------------------------------INTEGRATOR------------------------------------------------------------------*/
@@ -324,21 +365,23 @@ void IntegratorRigidBody(Body & Sphere,double dt){
 /*------------------------------------------------MAIN PROGRAM----------------------------------------------------------------*/
 int main(void)
 {
-  int i,j,k,M=Ny*(Nx-1)+Nx*(Ny-1);
-  double t;                  /*Times*/
+  int i,j,k,M=Nz*Ny*(Nx-1)+Nz*Nx*(Ny-1)+Nx*Ny*(Nz-1);
+  double t;                  /*Time*/
   double tdrawings,Ndrawings;/*Accountants*/
   Body Spring[N3D+1];        /*Oscillators Masses*/
   Oscillator SpringK[M];     /*Oscillators Springs*/
   Collider Hooke;            /*Collider*/
 
   double h=50*Nz;
-  double x0Break=Lx, y0Break=Ly, z0Break=Lz;                                           /*Distance of Separation in each axis*/
-  double m0=2*m,r0=35*L,Rx0=0,Ry0=0,Rz0=0,Vx0=0,Vy0=0,Vz0=0;                           /*Initial Conditions*/
-  double Theta0=0,Phi0=0,Psi0=0,Wx0=0,Wy0=0,Wz0=0;                                     /*Initial Conditions*/
-  double m1=1*m,r1=200*L,Rx1=Nx*x0Break/2,Ry1=Ny*y0Break/2,Rz1=Nz*z0Break+h,Vx1=10*v,Vy1=0 ,Vz1=0;/*Initial Conditions Sphere*/
-  double Theta1=0,Phi1=0,Psi1=0,Wx1=1,Wy1=0,Wz1=0.4/dt,I1=(2.0/5)*m1*r1*r1,I2=I1,I3=I1;/*Initial Conditions Sphere*/
-  double omegax=sqrt(Kx/m0),omegay=sqrt(Ky/m0),omegaz=sqrt(Kz/m0);                     /*One of Frequencies in each axis*/
-  double Tx=2*M_PI/omegax, tmax=15*Tx;                                                 /*Time Step and Tmax*/
+  double x0Break=Lx, y0Break=Ly, z0Break=Lz;                         /*Distance of Separation in each axis*/
+  double m0=2*m,r0=35*L,Rx0=0,Ry0=0,Rz0=0,Vx0=0,Vy0=0,Vz0=0;         /*Initial Conditions*/
+  double Theta0=0,Phi0=0,Psi0=0,Wx0=0,Wy0=0,Wz0=0;                   /*Initial Conditions*/
+  double m1=1*m,r1=200*L,Vx1=10*v,Vy1=0 ,Vz1=0;                      /*Initial Conditions Sphere*/
+  double Rx1=Nx*x0Break/2,Ry1=Ny*y0Break/2,Rz1=Nz*z0Break+h;         /*Initial Conditions Sphere*/
+  double Theta1=0,Phi1=0,Psi1=0;                                     /*Initial Conditions Sphere*/
+  double Wx1=0.1/dt,Wy1=0,Wz1=0.4/dt,I1=(2.0/5)*m1*r1*r1,I2=I1,I3=I1;/*Initial Conditions Sphere*/
+  double omegax=sqrt(Kx/m0),omegay=sqrt(Ky/m0),omegaz=sqrt(Kz/m0);   /*One of Frequencies in each axis*/
+  double Tx=2*M_PI/omegax, tmax=25*Tx;                               /*Time Step and Tmax*/
 
   /*Start Springs*/
   for(k=0;k<Nz;k++){for(j=0;j<Ny;j++){for(i=0;i<Nx;i++){
@@ -355,7 +398,7 @@ int main(void)
       
       if(tdrawings>tmax/Ndrawings){
 	StartSquare3D();
-	//StartFixedMasses3D(x0Break,y0Break,r0);
+	//StartFixedMasses3D(x0Break,y0Break,z0Break,r0);
 	for(i=0;i<N3D+1;i++){Spring[i].Draw3D();}
 	//for(j=0;j<Ny;j++){for(i=0;i<Nx;i++){SpringK[i].DrawInteractionSpring3D(Spring[i+j*Nx],Spring[i+1+j*Nx]);}}
 	FinishSquare();
