@@ -14,7 +14,7 @@ double I=m*L*L;                                          /*Buckingham Group*/
 double Gamma=pow(L*dt*dt,-0.5);                          /*Buckingham Group*/
 double KHertz=m*pow(dt,-2);                              /*Buckingham Group*/
 double KSpring=1e-2*m*pow(L*dt*dt*dt*dt,-0.5);           /*Buckingham Group*/
-double Kx=KSpring,Ky=KSpring,Kz=KSpring,Kcundall=KSpring;/*Constant of the springs on each axis and constant of the contact force*/
+double Kcundall=KSpring;/*Constant of the springs on each axis and constant of the contact force*/
 double Lx=100*L,Ly=100*L,Lz=100*L;                       /*Lengths for the animation*/
 double GammaSpring=1e-1/dt,GammaTangential=1e-3/dt;      /*Coefficients of friction for the spring and the contact force*/
 /*------------------------------------------------ADIMENSIONAL VARIABLES-------------------------------------------------------*/
@@ -50,9 +50,6 @@ public:
   void AddForce_y(double F0y);
   void AddForce_z(double F0z);
   void AddForce(vector3D F0);
-  /*Move Rotational Variables*/
-  void Move_Theta(double dt, double Constante);
-  void Move_W(double dt, double Constante);
   /*Add/Erases Torsions*/
   void EraseTorsion(void);
   void AddTorsion(vector3D Tau0);
@@ -90,15 +87,13 @@ void Body::Start(double Rx0,double Ry0,double Rz0,double Vx0,double Vy0,double V
   q2=sin(0.5*Theta0)*sin(0.5*(Phi0-Psi0));
   q3=cos(0.5*Theta0)*sin(0.5*(Phi0+Psi0));
 }
-void Body::Move_R(double dt, double Constante){R+=V*(Constante*dt);}
-void Body::Move_V(double dt, double Constante){V+=F*(Constante*dt/m);}
+void Body::Move_R(double dt, double Constante){R+=V*(Constante*dt);Theta+=W*(Constante*dt);}
+void Body::Move_V(double dt, double Constante){V+=F*(Constante*dt/m);W+=Tau*(Constante*dt/I);}
 void Body::EraseForce(void){F.cargue(0,0,0);}
 void Body::AddForce_x(double F0x){vector3D F0; F0.cargue(F0x,0,0);F+=F0;}
 void Body::AddForce_y(double F0y){vector3D F0; F0.cargue(0,F0y,0);F+=F0;}
 void Body::AddForce_z(double F0z){vector3D F0; F0.cargue(0,0,F0z);F+=F0;}
 void Body::AddForce(vector3D F0){F+=F0;}
-void Body::Move_Theta(double dt, double Constante){Theta+=W*(Constante*dt);}
-void Body::Move_W(double dt, double Constante){W+=Tau*(Constante*dt/I);}
 void Body::EraseTorsion(void){Tau.cargue(0,0,0);}
 void Body::AddTorsion(vector3D Tau0){Tau+=Tau0;}
 void Body::Draw(void){
@@ -170,8 +165,8 @@ void Collider::AllForces(Body* Spring,double dt){
   for(i=0;i<N3D;i++){Spring[i].AddForce(Spring[i].V*(-GammaSpring*Spring[i].m));}
   /*Add forces on y for extremum springs in z axis*/
   for(j=0;j<Ny;j++){for(i=0;i<Nx;i++){
-      Spring[i+Nx*j].AddForce_z(-Kz*Spring[i+Nx*j].R.z());
-      Spring[(Nz-1)*Ny*Nx+i+Nx*j].AddForce_z(-Kz*Spring[(Nz-1)*Ny*Nx+i+Nx*j].R.z());}}
+      Spring[i+Nx*j].AddForce_z(-KSpring*Spring[i+Nx*j].R.z());
+      Spring[(Nz-1)*Ny*Nx+i+Nx*j].AddForce_z(-KSpring*Spring[(Nz-1)*Ny*Nx+i+Nx*j].R.z());}}
   /*Local Interaction with periodic boundary conditions*/
   for(k=0;k<Nz;k++){for(j=0;j<Ny;j++){for(i=0;i<Nx;i++){
       if(k==Nz-1){/*Last z-line*/
@@ -192,7 +187,7 @@ void Collider::InteractionForceSpring(Body & Spring1, Body & Spring2){
   double dry=Spring2.R.y()-Spring1.R.y();
   double drz=Spring2.R.z()-Spring1.R.z();
   double F1x,F1y,F1z; vector3D F1;
-  F1.cargue(Kx*drx,Ky*dry,Kz*drz);
+  F1.cargue(KSpring*drx,KSpring*dry,KSpring*drz);
   Spring1.AddForce(F1); Spring2.AddForce(F1*(-1));
 }
 void Collider::InteractionForceSphere(Body & Spring1, Body & Spring2,vector3D & l,bool & InCollision,double dt){
@@ -312,27 +307,24 @@ void Integrator(Body *Spring,Collider Hooke,double dt){
   /*Move with Omelyan PEFRL*/
   int i;
   for(i=0;i<N3D+1;i++){Spring[i].Move_R(dt,Xi);}
-  for(i=0;i<N3D+1;i++){Spring[i].Move_Theta(dt,Xi);}
+  
+  
   Hooke.AllForces(Spring,dt);
   for(i=0;i<N3D+1;i++){Spring[i].Move_V(dt,(1-2*Lambda)/2);}
-  for(i=0;i<N3D+1;i++){Spring[i].Move_W(dt,(1-2*Lambda)/2);}
-  for(i=0;i<N3D+1;i++){Spring[i].Move_R(dt,Chi);}
-  for(i=0;i<N3D+1;i++){Spring[i].Move_Theta(dt,Chi);}
+   for(i=0;i<N3D+1;i++){Spring[i].Move_R(dt,Chi);}
+ 
   Hooke.AllForces(Spring,dt);
-  for(i=0;i<N3D+1;i++){Spring[i].Move_V(dt,Lambda);}
-  for(i=0;i<N3D+1;i++){Spring[i].Move_W(dt,Lambda);}
+  for(i=0;i<N3D+1;i++){Spring[i].Move_V(dt,Lambda);} 
   for(i=0;i<N3D+1;i++){Spring[i].Move_R(dt,1-2*(Chi+Xi));}
-  for(i=0;i<N3D+1;i++){Spring[i].Move_Theta(dt,1-2*(Chi+Xi));}
+ 
   Hooke.AllForces(Spring,dt);
   for(i=0;i<N3D+1;i++){Spring[i].Move_V(dt,Lambda);}
-  for(i=0;i<N3D+1;i++){Spring[i].Move_W(dt,Lambda);}
   for(i=0;i<N3D+1;i++){Spring[i].Move_R(dt,Chi);}
-  for(i=0;i<N3D+1;i++){Spring[i].Move_Theta(dt,Chi);}
+ 
   Hooke.AllForces(Spring,dt);
   for(i=0;i<N3D+1;i++){Spring[i].Move_V(dt,(1-2*Lambda)/2);}
-  for(i=0;i<N3D+1;i++){Spring[i].Move_W(dt,(1-2*Lambda)/2);}
   for(i=0;i<N3D+1;i++){Spring[i].Move_R(dt,Xi);}
-  for(i=0;i<N3D+1;i++){Spring[i].Move_Theta(dt,Xi);}
+  
 }
 void IntegratorRigidBody(Body & Sphere,double dt){
   Sphere.CalculateTorsion();
@@ -357,7 +349,7 @@ int main(void)
   double Rx1=Nx*x0Break/2,Ry1=Ny*y0Break/2,Rz1=Nz*z0Break+h;         /*Initial Conditions Sphere*/
   double Theta1=0,Phi1=0,Psi1=0;                                     /*Initial Conditions Sphere*/
   double Wx1=0.1/dt,Wy1=0,Wz1=0.4/dt,I1=(2.0/5)*m1*r1*r1,I2=I1,I3=I1;/*Initial Conditions Sphere*/
-  double omegax=sqrt(Kx/m0),omegay=sqrt(Ky/m0),omegaz=sqrt(Kz/m0);   /*One of Frequencies in each axis*/
+  double omegax=sqrt(KSpring/m0),omegay=sqrt(KSpring/m0),omegaz=sqrt(KSpring/m0);   /*One of Frequencies in each axis*/
   double Tx=2*M_PI/omegax, tmax=25*Tx;                               /*Time Step and Tmax*/
 
   /*Start Springs*/
