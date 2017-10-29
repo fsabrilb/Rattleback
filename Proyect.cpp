@@ -50,7 +50,6 @@ public:
   void Move_V(double dt, double Constante);
   //Add/Erases Forces 
   void EraseForce(void);
-  void AddForce_z(double F0z);
   void AddForce(vector3D F0);
   //Add Torsion
   void AddTorsion(vector3D Tau0);
@@ -94,7 +93,6 @@ void Body::Start(double Rx0,double Ry0,double Rz0,double Vx0,double Vy0,double V
 void Body::Move_R(double dt, double Constante){R+=V*(Constante*dt);Theta+=W*(Constante*dt);}
 void Body::Move_V(double dt, double Constante){V+=F*(Constante*dt/m);W+=Tau*(Constante*dt/I);}
 void Body::EraseForce(void){F.cargue(0,0,0);Tau.cargue(0,0,0);}
-void Body::AddForce_z(double F0z){vector3D F0; F0.cargue(0,0,F0z);F+=F0;}
 void Body::AddForce(vector3D F0){F+=F0;}
 void Body::AddTorsion(vector3D Tau0){Tau+=Tau0;}
 void Body::Draw(void){
@@ -156,22 +154,25 @@ public:
 };
 //--------------------------------------COLLIDER'S FUNCTIONS------------------------------------------------------------------------ 
 void Collider::Start(void){int i,j; for(i=0;i<N3D+1;i++){for(j=i+1;j<N3D+1;j++){l[i][j].cargue(0,0,0); InCollision[i][j]=false;}}}
-void Collider::AllForces(Body* Spring,double dt){
+
+void Collider::AllForces(Body* Spring,double dt)
+{
   int i,j,k;
+  vector3D ez; ez.cargue(0,0,1);
   //Erase all Forces and  Torsions 
   for(i=0;i<N3D+1;i++)Spring[i].EraseForce();
   //Add Gravitational Force due by the Earth's Gravitational Field 
-  for(i=N3D;i<N3D+1;i++){Spring[i].AddForce_z(-Spring[i].m*g);}
+  for(i=N3D;i<N3D+1;i++){Spring[i].AddForce(-Spring[i].m*g*ez);}
   //Add Viscous Force on the springs 
   for(i=0;i<N3D;i++){Spring[i].AddForce(Spring[i].V*(-GammaSpring*Spring[i].m));}
   //Add forces on y for extremum springs in z axis 
   for(j=0;j<Ny;j++){for(i=0;i<Nx;i++){
-      Spring[i+Nx*j].AddForce_z(-KSpring*Spring[i+Nx*j].R.z());
-      Spring[(Nz-1)*Ny*Nx+i+Nx*j].AddForce_z(-KSpring*Spring[(Nz-1)*Ny*Nx+i+Nx*j].R.z());}}
+      Spring[i+Nx*j].AddForce(-KSpring*Spring[i+Nx*j].R.z()*ez);
+      Spring[(Nz-1)*Ny*Nx+i+Nx*j].AddForce(-KSpring*Spring[(Nz-1)*Ny*Nx+i+Nx*j].R.z()*ez);}}
   //Local Interaction with periodic boundary conditions 
   for(k=0;k<Nz;k++){for(j=0;j<Ny;j++){for(i=0;i<Nx;i++){
       if(k==Nz-1){//Last z-line 
-	Spring[k*Nx*Ny+i+j*Nx].AddForce_z(0);
+	Spring[k*Nx*Ny+i+j*Nx].AddForce(0*ez);
 	InteractionForceSpring(Spring[k*Nx*Ny+j*Nx+(i%Nx)],Spring[k*Nx*Ny+j*Nx+((i+1)%Nx)]); //x-axis 
 	InteractionForceSpring(Spring[k*Nx*Ny+(j%Ny)*Nx+i],Spring[k*Nx*Ny+((j+1)%Ny)*Nx+i]);}//y-axis 
       else{
@@ -183,20 +184,22 @@ void Collider::AllForces(Body* Spring,double dt){
   for(i=0;i<N3D;i++){for(j=i+1;j<N3D+1;j++){InteractionForceSphere(Spring[i],Spring[j],l[i][j],InCollision[i][j],dt);}}
 }
 
-void Collider::InteractionForceSpring(Body & Spring1, Body & Spring2){
-  double drx=Spring2.R.x()-Spring1.R.x();
-  double dry=Spring2.R.y()-Spring1.R.y();
-  double drz=Spring2.R.z()-Spring1.R.z();
-  double F1x,F1y,F1z; vector3D F1;
-  F1.cargue(KSpring*drx,KSpring*dry,KSpring*drz);
+void Collider::InteractionForceSpring(Body & Spring1, Body & Spring2)
+{
+  vector3D F1,dr;
+  dr=Spring2.R-Spring1.R;
+  F1=KSpring*dr;
   Spring1.AddForce(F1); Spring2.AddForce(F1*(-1));
 }
-void Collider::InteractionForceSphere(Body & Spring1, Body & Spring2,vector3D & l,bool & InCollision,double dt){
+
+void Collider::InteractionForceSphere(Body & Spring1, Body & Spring2,vector3D & l,bool & InCollision,double dt)
+{
   vector3D R21,n,V1,V2,Vc,Vcn,Vct,t,Fn,Ft,F2; 
   double R1x,R1y,R1z,R2x,R2y,R2z,r1,r2,d21,s,m1,m2,m12,componentVcn,componentFn,normVct,Ftmax,normFt;
   double ERFF=1e-8;
-  R1x=Spring1.X(); R2x=Spring2.X(); R1y=Spring1.Y(); R2y=Spring2.Y(); R1z=Spring1.Z(); R2z=Spring2.Z(); 
-  R21.cargue(R2x-R1x,R2y-R1y,R2z-R1z); d21=norma(R21);  s=(Spring1.r+Spring2.r)-d21;
+  
+  R21=(Spring2.R+Spring2.RBreak)-(Spring1.R+Spring1.RBreak);
+  d21=norma(R21);  s=(Spring1.r+Spring2.r)-d21;
   V1=Spring1.V; V2=Spring2.V; 
   if(s>0){ //If crashing,
     //Geometry and Contact Dinamycs 
